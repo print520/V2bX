@@ -47,7 +47,7 @@ A V2board node server based on multi core, modified from XrayR.
 ### 一键安装
 
 ```
-wget -N https://raw.githubusercontent.com/print520/V2bX-script/master/install.sh && bash install.sh
+wget -N https://raw.githubusercontent.com/print520/V2bX/master/install/install.sh && bash install.sh
 ```
 
 ### 手动安装
@@ -56,8 +56,8 @@ wget -N https://raw.githubusercontent.com/print520/V2bX-script/master/install.sh
 
 ## 构建
 ``` bash
-# 通过-tags选项指定要编译的内核， 可选 xray， sing, hysteria2
-GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing xray hysteria2 with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/InazumaV/V2bX/cmd.version=$version' -s -w -buildid="
+# 通过-tags选项指定要编译的内核， 可选 xray, hysteria2
+GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "xray hysteria2 with_quic with_grpc with_utls with_wireguard with_acme with_gvisor" -trimpath -ldflags "-X 'github.com/InazumaV/V2bX/cmd.version=$version' -s -w -buildid="
 ```
 
 ## 配置文件及详细使用教程
@@ -82,7 +82,6 @@ GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "sing xray hysteria2 
 * [VNet-V2ray](https://github.com/ProxyPanel/VNet-V2ray)
 * [Air-Universe](https://github.com/crossfw/Air-Universe)
 * [XrayR](https://github.com/XrayR/XrayR)
-* [sing-box](https://github.com/SagerNet/sing-box)
 
 ## Stars 增长记录
 

@@ -5,22 +5,29 @@
   },
   "Cores": [
     {
-      "Type": "sing",
+      "Type": "xray",
       "Log": {
-        "Level": "info",
-        "Timestamp": true
+        "Level": "warning",
+        "AccessPath": "",
+        "ErrorPath": ""
       },
-      "NTP": {
-        "Enable": false,
-        "Server": "time.apple.com",
-        "ServerPort": 0
-      },
-      "OriginalPath": "/etc/V2bX/sing_origin.json"
+      "AssetPath": "/etc/V2bX/",
+      "DnsConfigPath": "",
+      "RouteConfigPath": "",
+      "InboundConfigPath": "",
+      "OutboundConfigPath": "",
+      "XrayConnectionConfig": {
+        "handshake": 4,
+        "connIdle": 30,
+        "uplinkOnly": 2,
+        "downlinkOnly": 4,
+        "bufferSize": 64
+      }
     }
   ],
   "Nodes": [
     {
-      "Core": "sing",
+      "Core": "xray",
       "ApiHost": "http://127.0.0.1",
       "ApiKey": "test",
       "NodeID": 33,
@@ -30,8 +37,16 @@
       "SendIP": "0.0.0.0",
       "DeviceOnlineMinTraffic": 200,
       "MinReportTraffic": 0,
-      "TCPFastOpen": false,
-      "SniffEnabled": true,
+      "XrayOptions": {
+        "EnableProxyProtocol": false,
+        "EnableDNS": false,
+        "DNSType": "AsIs",
+        "EnableUot": false,
+        "EnableTFO": false,
+        "DisableIVCheck": false,
+        "DisableSniffing": false,
+        "EnableFallback": false
+      },
       "CertConfig": {
         "CertMode": "self",
         "RejectUnknownSni": false,

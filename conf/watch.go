@@ -10,7 +10,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-func (p *Conf) Watch(filePath, xDnsPath string, sDnsPath string, reload func()) error {
+func (p *Conf) Watch(filePath, xDnsPath string, reload func()) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return fmt.Errorf("new watcher error: %s", err)
@@ -31,7 +31,7 @@ func (p *Conf) Watch(filePath, xDnsPath string, sDnsPath string, reload func()) 
 				go func() {
 					time.Sleep(5 * time.Second)
 					switch filepath.Base(strings.TrimSuffix(e.Name, "~")) {
-					case filepath.Base(xDnsPath), filepath.Base(sDnsPath):
+					case filepath.Base(xDnsPath):
 						log.Println("DNS file changed, reloading...")
 					default:
 						log.Println("config file changed, reloading...")
@@ -57,12 +57,6 @@ func (p *Conf) Watch(filePath, xDnsPath string, sDnsPath string, reload func()) 
 	}
 	if xDnsPath != "" {
 		err = watcher.Add(xDnsPath)
-		if err != nil {
-			return fmt.Errorf("watch dns file error: %s", err)
-		}
-	}
-	if sDnsPath != "" {
-		err = watcher.Add(sDnsPath)
 		if err != nil {
 			return fmt.Errorf("watch dns file error: %s", err)
 		}
