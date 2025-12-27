@@ -167,15 +167,26 @@ func (l *Limiter) CheckLimit(taguuid string, ip string, isTcp bool, noSSUDP bool
 				} else if deviceLimit > 0 {
 					if deviceLimit <= aliveIp {
 						oldipMap.Delete(ip)
+						// Clean up empty ipMap to prevent memory leak
+						isEmpty := true
+						oldipMap.Range(func(_, _ interface{}) bool {
+							isEmpty = false
+							return false
+						})
+						if isEmpty {
+							l.UserOnlineIP.Delete(taguuid)
+						}
 						return nil, true
 					}
 				}
 			}
-		} else if v, ok := l.OldUserOnline.Load(ip); ok {
-			if v.(int) == uid {
-				l.OldUserOnline.Delete(ip)
-			}
 		} else {
+			// New taguuid entry was created, check old user online
+			if v, ok := l.OldUserOnline.Load(ip); ok {
+				if v.(int) == uid {
+					l.OldUserOnline.Delete(ip)
+				}
+			}
 			if deviceLimit > 0 {
 				if deviceLimit <= aliveIp {
 					l.UserOnlineIP.Delete(taguuid)

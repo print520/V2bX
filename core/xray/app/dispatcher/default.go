@@ -199,6 +199,16 @@ func (d *DefaultDispatcher) getLink(ctx context.Context, network net.Network) (*
 			lm = &LinkManager{
 				links: make(map[*ManagedWriter]buf.Reader),
 			}
+			// Set callback to clean up empty LinkManager
+			userEmail := user.Email
+			lm.SetOnEmpty(func() {
+				// Double check that it's still empty before deleting
+				if loaded, ok := d.LinkManagers.Load(userEmail); ok {
+					if loaded.(*LinkManager).IsEmpty() {
+						d.LinkManagers.Delete(userEmail)
+					}
+				}
+			})
 			d.LinkManagers.Store(user.Email, lm)
 		} else {
 			lm = lmloaded.(*LinkManager)
@@ -393,6 +403,16 @@ func (d *DefaultDispatcher) DispatchLink(ctx context.Context, destination net.De
 			lm = &LinkManager{
 				links: make(map[*ManagedWriter]buf.Reader),
 			}
+			// Set callback to clean up empty LinkManager
+			userEmail := user.Email
+			lm.SetOnEmpty(func() {
+				// Double check that it's still empty before deleting
+				if loaded, ok := d.LinkManagers.Load(userEmail); ok {
+					if loaded.(*LinkManager).IsEmpty() {
+						d.LinkManagers.Delete(userEmail)
+					}
+				}
+			})
 			d.LinkManagers.Store(user.Email, lm)
 		} else {
 			lm = lmloaded.(*LinkManager)
