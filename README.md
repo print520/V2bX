@@ -85,4 +85,4 @@ GOEXPERIMENT=jsonv2 go build -v -o build_assets/V2bX -tags "xray hysteria2 with_
 
 ## Stars 增长记录
 
-[![Stargazers over time](https://starchart.cc/wyx2685/V2bX.svg)](https://starchart.cc/wyx2685/V2bX)
+[![Stargazers over time](https://starchart.cc/print520/V2bX.svg?variant=adaptive)](https://starchart.cc/print520/V2bX)
