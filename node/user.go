@@ -20,6 +20,26 @@ func (c *Controller) reportUserTrafficTask() (err error) {
 			log.WithField("tag", c.tag).Infof("Report %d users traffic", len(userTraffic))
 			log.WithField("tag", c.tag).Debugf("User traffic: %+v", userTraffic)
 		}
+
+		// Update traffic map for dynamic speed limit
+		if c.LimitConfig.EnableDynamicSpeedLimit {
+			c.trafficLock.Lock()
+			// Create UID to UUID map
+			uidToUuid := make(map[int]string)
+			for _, user := range c.userList {
+				uidToUuid[user.Id] = user.Uuid
+			}
+			// Update traffic map with reported traffic
+			for _, traffic := range userTraffic {
+				if uuid, ok := uidToUuid[traffic.UID]; ok {
+					total := traffic.Upload + traffic.Download
+					if total > 0 {
+						c.traffic[uuid] = total
+					}
+				}
+			}
+			c.trafficLock.Unlock()
+		}
 	}
 
 	if onlineDevice, err := c.limiter.GetOnlineDevice(); err != nil {

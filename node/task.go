@@ -40,12 +40,15 @@ func (c *Controller) startTasks(node *panel.NodeInfo) {
 		}
 	}
 	if c.LimitConfig.EnableDynamicSpeedLimit {
+		c.trafficLock.Lock()
 		c.traffic = make(map[string]int64)
+		c.trafficLock.Unlock()
 		c.dynamicSpeedLimitPeriodic = &task.Task{
 			Interval: time.Duration(c.LimitConfig.DynamicSpeedLimitConfig.Periodic) * time.Second,
 			Execute:  c.SpeedChecker,
 		}
-		log.Printf("[%s: %d] Start dynamic speed limit", c.apiClient.NodeType, c.apiClient.NodeId)
+		log.WithField("tag", c.tag).Info("Start dynamic speed limit")
+		_ = c.dynamicSpeedLimitPeriodic.Start(false)
 	}
 }
 
@@ -83,7 +86,9 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		if newU != nil {
 			c.userList = newU
 		}
+		c.trafficLock.Lock()
 		c.traffic = make(map[string]int64)
+		c.trafficLock.Unlock()
 		// Remove old node
 		log.WithField("tag", c.tag).Info("Node changed, reload")
 		err = c.server.DelNode(c.tag)
@@ -159,7 +164,7 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		}
 		if c.userReportPeriodic.Interval != newN.PushInterval &&
 			newN.PushInterval != 0 {
-			c.userReportPeriodic.Interval = newN.PullInterval
+			c.userReportPeriodic.Interval = newN.PushInterval
 			c.userReportPeriodic.Close()
 			_ = c.userReportPeriodic.Start(false)
 		}
@@ -214,9 +219,11 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 		}
 		// clear traffic record
 		if c.LimitConfig.EnableDynamicSpeedLimit {
+			c.trafficLock.Lock()
 			for i := range deleted {
 				delete(c.traffic, deleted[i].Uuid)
 			}
+			c.trafficLock.Unlock()
 		}
 	}
 	c.userList = newU
@@ -228,12 +235,19 @@ func (c *Controller) nodeInfoMonitor() (err error) {
 }
 
 func (c *Controller) SpeedChecker() error {
+	c.trafficLock.Lock()
+	defer c.trafficLock.Unlock()
 	for u, t := range c.traffic {
 		if t >= c.LimitConfig.DynamicSpeedLimitConfig.Traffic {
 			err := c.limiter.UpdateDynamicSpeedLimit(c.tag, u,
 				c.LimitConfig.DynamicSpeedLimitConfig.SpeedLimit,
 				time.Now().Add(time.Duration(c.LimitConfig.DynamicSpeedLimitConfig.ExpireTime)*time.Minute))
-			log.WithField("err", err).Error("Update dynamic speed limit failed")
+			if err != nil {
+				log.WithFields(log.Fields{
+					"tag": c.tag,
+					"err": err,
+				}).Error("Update dynamic speed limit failed")
+			}
 			delete(c.traffic, u)
 		}
 	}

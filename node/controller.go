@@ -3,6 +3,7 @@ package node
 import (
 	"errors"
 	"fmt"
+	"sync"
 
 	"github.com/InazumaV/V2bX/api/panel"
 	"github.com/InazumaV/V2bX/common/task"
@@ -18,6 +19,7 @@ type Controller struct {
 	tag                       string
 	limiter                   *limiter.Limiter
 	traffic                   map[string]int64
+	trafficLock               sync.RWMutex
 	userList                  []panel.UserInfo
 	aliveMap                  map[int]int
 	info                      *panel.NodeInfo

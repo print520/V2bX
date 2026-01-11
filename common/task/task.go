@@ -56,9 +56,10 @@ func (t *Task) Start(first bool) error {
 
 func (t *Task) Close() {
 	t.access.Lock()
-	if t.running {
+	defer t.access.Unlock()
+	if t.running && t.stop != nil {
 		t.running = false
 		close(t.stop)
+		t.stop = nil
 	}
-	t.access.Unlock()
 }
